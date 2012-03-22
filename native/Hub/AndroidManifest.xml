@@ -39,6 +39,14 @@
 		
 		<!-- Choose server activity -->
 		<activity android:name="com.salesforce.androidsdk.ui.ServerPickerActivity" android:excludeFromRecents="true" />
+		
+		<!-- Delegated Login Activity -->
+		<activity android:name=".DelegatedLoginActivity">
+		    <intent-filter>
+		        <action android:name="androidsdk.delegatedLogin" />
+		        <category android:name="android.intent.category.DEFAULT" />
+		    </intent-filter>
+		</activity>
 	</application>
 
 	<uses-permission android:name="android.permission.INTERNET" />

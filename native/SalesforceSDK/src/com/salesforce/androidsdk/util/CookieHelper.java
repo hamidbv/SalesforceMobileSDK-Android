@@ -24,14 +24,46 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.spoke;
+package com.salesforce.androidsdk.util;
 
-import com.salesforce.androidsdk.ui.SalesforceR;
+import android.os.SystemClock;
+import android.util.Log;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
+import android.webkit.WebView;
 
+import com.salesforce.androidsdk.rest.RestClient;
 
 /**
- * Since the SalesforceSDK is packaged as a jar, it can't have resources.
- * Class that allows references to resources defined outside the SDK.
+ * Helper class for managing cookies
  */
-public class SalesforceRImpl extends SalesforceR {
+public class CookieHelper {
+    /**
+     * Set cookies on cookie manager
+     * @param client
+     */
+	public static void setSidCookies(WebView webView, RestClient client) {
+    	Log.i("CookieHelper.setSidCookies", "setting cookies");
+    	CookieSyncManager cookieSyncMgr = CookieSyncManager.getInstance();
+    	
+    	CookieManager cookieMgr = CookieManager.getInstance();
+    	cookieMgr.setAcceptCookie(true);  // Required to set additional cookies that the auth process will return.
+    	cookieMgr.removeSessionCookie();
+    	
+    	SystemClock.sleep(250); // removeSessionCookies kicks out a thread - let it finish
+
+    	String accessToken = client.getAuthToken();
+    	
+    	// Android 3.0+ clients want to use the standard .[domain] format. Earlier clients will only work
+    	// with the [domain] format.  Set them both; each platform will leverage its respective format.
+    	addSidCookieForDomain(cookieMgr,"salesforce.com", accessToken);
+    	addSidCookieForDomain(cookieMgr,".salesforce.com", accessToken);
+
+	    cookieSyncMgr.sync();
+    }
+
+    private static void addSidCookieForDomain(CookieManager cookieMgr, String domain, String sid) {
+        String cookieStr = "sid=" + sid;
+    	cookieMgr.setCookie(domain, cookieStr);
+    }
 }

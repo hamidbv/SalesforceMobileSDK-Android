@@ -49,6 +49,7 @@ import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.salesforce.androidsdk.app.ForceApp;
@@ -76,10 +77,10 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 	// Request code when calling server picker activity
     public static final int PICK_SERVER_CODE = 10;	
 	
-    private SalesforceR salesforceR;
 	private boolean wasBackgrounded;
-	private WebView webView;
-	private LoginOptions loginOptions;
+	protected WebView webView;
+    protected SalesforceR salesforceR;
+	protected LoginOptions loginOptions;
 
     /**************************************************************************************************
      *
@@ -103,6 +104,11 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 		
 		// Setup content view
 		setContentView(salesforceR.layoutLogin());
+		
+		// Overriding title if one was passed in
+		if (loginOptions.loginTitle != null) {
+			((TextView) findViewById(salesforceR.idLoginTitle())).setText(loginOptions.loginTitle);
+		}
 
 		// Setup the WebView.
 		webView = (WebView) findViewById(salesforceR.idLoginWebView());
@@ -118,7 +124,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 		}
 		// Otherwise start clean
 		else {
-			clearCookies();
+			setupWebViewCookies();
 		}
 		loadLoginPage();
 	}
@@ -257,6 +263,10 @@ public class LoginActivity extends AccountAuthenticatorActivity {
      * Misc
      * 
      **************************************************************************************************/
+	
+	protected void setupWebViewCookies() {
+		clearCookies();
+	}
 	
 	protected void showError(Exception exception) {
 		Toast.makeText(this,

@@ -276,7 +276,7 @@ public class RestClient {
 		public final String clientId;
 		public final URI instanceUrl;
 		public final URI loginUrl;
-		public  final String accountName;
+		public final String accountName;
 		public final String username;
 		public final String userId;
 		public final String orgId;

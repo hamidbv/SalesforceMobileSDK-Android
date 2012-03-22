@@ -26,21 +26,33 @@
  */
 package com.salesforce.spoke;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.salesforce.androidsdk.app.ForceApp;
-import com.salesforce.androidsdk.rest.ClientManager;
+import com.salesforce.androidsdk.auth.HttpAccess;
 import com.salesforce.androidsdk.rest.ClientManager.LoginOptions;
-import com.salesforce.androidsdk.rest.ClientManager.RestClientCallback;
 import com.salesforce.androidsdk.rest.RestClient;
+import com.salesforce.androidsdk.rest.RestClient.ClientInfo;
 
 /**
- * Main activity
+ * Main activity for Spoke
+ * 
+ * Spoke calls out to the hub to get its access token
+ * - hub does a full login if it doesn't have an access token already
+ * - hub only does the approval step otherwise
+ * 
  */
 public class MainActivity extends Activity {
+
+	private static final int DELEGATED_LOGIN = 10;
+	private RestClient client;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,72 +60,55 @@ public class MainActivity extends Activity {
 
 		// Setup view
 		setContentView(R.layout.main);
-	}
-	
-	@Override 
-	public void onResume() {
-		super.onResume();
-		
-		// Hide everything until we are logged in
-		findViewById(R.id.root).setVisibility(View.INVISIBLE);
-		
-		/*
-		 * Un-comment this block to have the passcode screen
-		
-		// Bring up passcode screen if needed
-		ForceApp.APP.getPasscodeManager().lockIfNeeded(this, true);
-		
-		// Do nothing - when the app gets unlocked we will be back here
-		if (ForceApp.APP.getPasscodeManager().isLocked()) {
-			return;
-		}
-		
-		*/
-		
-		// Login options
-		String accountType = ForceApp.APP.getAccountType();
-    	LoginOptions loginOptions = new LoginOptions(
-    			null, // login host is chosen by user through the server picker 
-    			ForceApp.APP.getPasscodeHash(),
-    			getString(R.string.oauth_callback_url),
-    			getString(R.string.oauth_client_id),
-    			new String[] {"api"});
-		
-		// Get a rest client
-		new ClientManager(this, accountType, loginOptions).getRestClient(this, new RestClientCallback() {
-			@Override
-			public void authenticatedRestClient(RestClient client) {
-				if (client == null) {
-					ForceApp.APP.logout(MainActivity.this);
-					return;
-				}
-				
-				// Show everything
-				findViewById(R.id.root).setVisibility(View.VISIBLE);
 
-				// Show welcome
-				((TextView) findViewById(R.id.welcome_text)).setText(getString(R.string.welcome, client.getClientInfo().username));
-				
-			}
-		});
+		// Login through hub
+		LoginOptions loginOptions = new LoginOptions(
+				getString(R.string.app_name), 
+				null, 
+				null, 
+				getString(R.string.oauth_callback_url),
+				getString(R.string.oauth_client_id),
+				new String[] { "api" });
+
+		Intent intent = new Intent("androidsdk.delegatedLogin");
+		intent.putExtras(loginOptions.asBundle());
+	    startActivityForResult(intent, DELEGATED_LOGIN);
 	}
 	
 	@Override
-	public void onUserInteraction() {
-		/*
-		 * Un-comment this block if you usethe passcode screen
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == DELEGATED_LOGIN) { 
+			if (resultCode == Activity.RESULT_OK) {
+				try {
+					String clientId = data.getStringExtra("clientId");
+					String instanceUrl = data.getStringExtra("instanceUrl");
+					String loginUrl = data.getStringExtra("loginUrl");
+					String accountName = data.getStringExtra("accountName");
+					String username = data.getStringExtra("username");
+					String userId = data.getStringExtra("userId");
+					String orgId = data.getStringExtra("orgId");
 
-		ForceApp.APP.getPasscodeManager().recordUserInteraction();
+					ClientInfo clientInfo = new ClientInfo(clientId, new URI(instanceUrl), new URI(loginUrl), accountName, username, userId, orgId);
+					String authToken = data.getStringExtra("authToken");
+					client = new RestClient(clientInfo, authToken, HttpAccess.DEFAULT, null);
+
+					// Show everything
+					findViewById(R.id.root).setVisibility(View.VISIBLE);
 		
-		*/
-	}
-
-	/**
-	 * Called when "Logout" button is clicked. 
-	 * 
-	 * @param v
-	 */
-	public void onLogoutClick(View v) {
-		ForceApp.APP.logout(this);
+					// Show welcome
+					((TextView) findViewById(R.id.welcome_text)).setText(getString(R.string.welcome, client.getClientInfo().username));
+				
+				} 
+				catch (URISyntaxException e) {
+					Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+				}
+			}
+			else {
+				Toast.makeText(this, "Failed to call Hub", Toast.LENGTH_LONG).show();
+			}
+		}
+		else {
+	        super.onActivityResult(requestCode, resultCode, data);
+	    }
 	}
 }

@@ -73,7 +73,6 @@ public class MainActivity extends Activity {
 		// Login options
 		String accountType = ForceApp.APP.getAccountType();
     	LoginOptions loginOptions = new LoginOptions(
-    			null, // login host is chosen by user through the server picker 
     			ForceApp.APP.getPasscodeHash(),
     			getString(R.string.oauth_callback_url),
     			getString(R.string.oauth_client_id),

@@ -38,10 +38,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.SystemClock;
 import android.util.Log;
-import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
 import android.webkit.WebView;
 
 import com.phonegap.api.Plugin;
@@ -54,6 +51,7 @@ import com.salesforce.androidsdk.rest.RestClient;
 import com.salesforce.androidsdk.rest.RestClient.ClientInfo;
 import com.salesforce.androidsdk.ui.SalesforceDroidGapActivity;
 import com.salesforce.androidsdk.ui.SalesforceGapViewClient;
+import com.salesforce.androidsdk.util.CookieHelper;
 
 /**
  * PhoneGap plugin for Salesforce OAuth.
@@ -111,7 +109,7 @@ public class SalesforceOAuthPlugin extends Plugin {
 						Log.i("SalesforceOAuthPlugin.autoRefreshIfNeeded", "Auto-refresh succeeded");
 						updateRefreshTime();
 						SalesforceOAuthPlugin.client = c;
-						setSidCookies(webView, SalesforceOAuthPlugin.client);
+						CookieHelper.setSidCookies(webView, SalesforceOAuthPlugin.client);
 						Log.i("SalesforceOAuthPlugin.autoRefreshIfNeeded", "Firing salesforceSessionRefresh event");
 						ctx.sendJavascript("PhoneGap.fireDocumentEvent('salesforceSessionRefresh'," + getJSONCredentials(SalesforceOAuthPlugin.client).toString() + ");");
 					}
@@ -191,7 +189,7 @@ public class SalesforceOAuthPlugin extends Plugin {
 
 	private void callAuthenticateSuccess(final String callbackId) {
 		Log.i("SalesforceOAuthPlugin.callAuthenticateSuccess", "Calling authenticate success callback");
-		setSidCookies(webView, SalesforceOAuthPlugin.client);
+		CookieHelper.setSidCookies(webView, SalesforceOAuthPlugin.client);
 		success(new PluginResult(PluginResult.Status.OK, getJSONCredentials(SalesforceOAuthPlugin.client)), callbackId);
 	}
 	
@@ -295,11 +293,9 @@ public class SalesforceOAuthPlugin extends Plugin {
 		String[] scopes = jsonArrayToArray(scopesJson);
 		
 		LoginOptions loginOptions = new LoginOptions(
-				null, // set by app 
 				ForceApp.APP.getPasscodeHash(),
 				oauthProperties.getString("oauthRedirectURI"),
-				oauthProperties.getString("remoteAccessConsumerKey"),
-				scopes);
+				oauthProperties.getString("remoteAccessConsumerKey"), scopes);
 		
 		return loginOptions;
 	}
@@ -323,41 +319,4 @@ public class SalesforceOAuthPlugin extends Plugin {
 		SalesforceOAuthPlugin.autoRefresh = false;
 		SalesforceOAuthPlugin.lastRefreshTime = -1;
 	}
-
-
-	/**************************************************************************************************
-	 * 
-	 * Helper methods for managing cookies
-	 * 
-	 **************************************************************************************************/
-
-    /**
-     * Set cookies on cookie manager
-     * @param client
-     */
-    private static void setSidCookies(WebView webView, RestClient client) {
-    	Log.i("SalesforceOAuthPlugin.setSidCookies", "setting cookies");
-    	CookieSyncManager cookieSyncMgr = CookieSyncManager.getInstance();
-    	
-    	CookieManager cookieMgr = CookieManager.getInstance();
-    	cookieMgr.setAcceptCookie(true);  // Required to set additional cookies that the auth process will return.
-    	cookieMgr.removeSessionCookie();
-    	
-    	SystemClock.sleep(250); // removeSessionCookies kicks out a thread - let it finish
-
-    	String accessToken = client.getAuthToken();
-    	
-    	// Android 3.0+ clients want to use the standard .[domain] format. Earlier clients will only work
-    	// with the [domain] format.  Set them both; each platform will leverage its respective format.
-    	addSidCookieForDomain(cookieMgr,"salesforce.com", accessToken);
-    	addSidCookieForDomain(cookieMgr,".salesforce.com", accessToken);
-
-	    cookieSyncMgr.sync();
-    }
-
-    private static void addSidCookieForDomain(CookieManager cookieMgr, String domain, String sid) {
-        String cookieStr = "sid=" + sid;
-    	cookieMgr.setCookie(domain, cookieStr);
-    }
-
 }

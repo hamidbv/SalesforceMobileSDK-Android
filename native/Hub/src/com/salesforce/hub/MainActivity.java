@@ -38,7 +38,7 @@ import com.salesforce.androidsdk.rest.ClientManager.RestClientCallback;
 import com.salesforce.androidsdk.rest.RestClient;
 
 /**
- * Main activity
+ * Main activity for hub
  */
 public class MainActivity extends Activity {
 
@@ -73,11 +73,10 @@ public class MainActivity extends Activity {
 		// Login options
 		String accountType = ForceApp.APP.getAccountType();
     	LoginOptions loginOptions = new LoginOptions(
-    			null, // login host is chosen by user through the server picker 
     			ForceApp.APP.getPasscodeHash(),
     			getString(R.string.oauth_callback_url),
     			getString(R.string.oauth_client_id),
-    			new String[] {"api"});
+    			new String[] {"web", "api"});
 		
 		// Get a rest client
 		new ClientManager(this, accountType, loginOptions).getRestClient(this, new RestClientCallback() {

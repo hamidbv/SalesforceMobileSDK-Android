@@ -39,6 +39,7 @@ public class SalesforceR {
 	/* Login */
 	public int stringAccountType() { return -1; }
 	public int layoutLogin() { return -1; }
+	public int idLoginTitle() { return -1; }
 	public int idLoginWebView() { return -1; }
 	public int stringGenericError() { return -1; }
 	public int stringGenericAuthenticationErrorTitle() { return -1; }

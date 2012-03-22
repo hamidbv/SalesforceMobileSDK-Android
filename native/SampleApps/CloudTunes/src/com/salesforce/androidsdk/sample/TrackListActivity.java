@@ -50,7 +50,6 @@ public class TrackListActivity  extends Activity{
 		// Login options
 		String accountType = getString(R.string.account_type);
 		LoginOptions loginOptions = new LoginOptions(
-				null, // gets overridden by LoginActivity based on server picked by uuser 
 				ForceApp.APP.getPasscodeHash(),
 				getString(R.string.oauth_callback_url),
 				getString(R.string.oauth_client_id),
