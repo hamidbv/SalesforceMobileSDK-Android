@@ -44,8 +44,7 @@ public class CookieHelper {
      */
 	public static void setSidCookies(WebView webView, RestClient client) {
     	Log.i("CookieHelper.setSidCookies", "setting cookies");
-    	CookieSyncManager cookieSyncMgr = CookieSyncManager.getInstance();
-    	
+    	CookieSyncManager cookieSyncMgr = CookieSyncManager.getInstance();    	
     	CookieManager cookieMgr = CookieManager.getInstance();
     	cookieMgr.setAcceptCookie(true);  // Required to set additional cookies that the auth process will return.
     	cookieMgr.removeSessionCookie();

@@ -45,13 +45,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.salesforce.androidsdk.app.ForceApp;
@@ -94,6 +93,9 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+    	//ensure we have a CookieSyncManager
+    	CookieSyncManager.createInstance(this);
+		
 		// Object which allows reference to resources living outside the SDK
 		salesforceR = ForceApp.APP.getSalesforceR();
 		
@@ -108,7 +110,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 		setContentView(salesforceR.layoutLogin());
 		
 		// Prepare cookies
-		if (savedInstanceState != null) {
+		if (savedInstanceState == null) {
 			setupWebViewCookies();
 		}
 		
@@ -302,6 +304,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 	}
 
 	protected void clearCookies() {
+		Log.i("LoginActivity", "Clearing cookies");
 		CookieManager cm = CookieManager.getInstance();
 		cm.removeAllCookie();
 	}
