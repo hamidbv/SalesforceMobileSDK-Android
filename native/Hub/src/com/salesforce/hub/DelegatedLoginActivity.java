@@ -86,12 +86,6 @@ public class DelegatedLoginActivity extends LoginActivity {
 	}
 
 	@Override
-	protected void loadLoginPage() {
-		webView.loadUrl("https://tapp0.salesforce.com/home/home.jsp");
-		// webView.loadUrl("http://www.google.com");
-	}
-
-	@Override
 	protected void onAuthFlowComplete(TokenEndpointResponse tr) {
 		FinishDelegatedAuthTask t = new FinishDelegatedAuthTask();
 		t.execute(tr);
