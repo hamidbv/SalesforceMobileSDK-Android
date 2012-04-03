@@ -63,7 +63,6 @@ public class MainActivity extends Activity {
 
 		// Login through hub
 		LoginOptions loginOptions = new LoginOptions(
-				getString(R.string.app_name), 
 				null, 
 				null, 
 				getString(R.string.oauth_callback_url),

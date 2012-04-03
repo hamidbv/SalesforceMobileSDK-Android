@@ -76,7 +76,7 @@ public class MainActivity extends Activity {
     			ForceApp.APP.getPasscodeHash(),
     			getString(R.string.oauth_callback_url),
     			getString(R.string.oauth_client_id),
-    			new String[] {"web", "api"});
+    			new String[] {"full"});
 		
 		// Get a rest client
 		new ClientManager(this, accountType, loginOptions).getRestClient(this, new RestClientCallback() {

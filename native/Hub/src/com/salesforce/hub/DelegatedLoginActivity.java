@@ -29,6 +29,7 @@ package com.salesforce.hub;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.webkit.CookieSyncManager;
 
 import com.salesforce.androidsdk.app.ForceApp;
 import com.salesforce.androidsdk.auth.HttpAccess;
@@ -50,6 +51,18 @@ import com.salesforce.androidsdk.util.CookieHelper;
  */
 public class DelegatedLoginActivity extends LoginActivity {
 
+    @Override
+    public void onResume() {
+    	CookieSyncManager.getInstance().startSync();
+    	super.onResume();
+    }
+    
+    @Override
+    public void onPause() {
+    	CookieSyncManager.getInstance().stopSync();
+    	super.onPause();
+    }
+	
 	@Override
 	protected void setupWebViewCookies() {
 		String accountType = ForceApp.APP.getAccountType();
@@ -57,20 +70,25 @@ public class DelegatedLoginActivity extends LoginActivity {
     			ForceApp.APP.getPasscodeHash(),
     			getString(R.string.oauth_callback_url),
     			getString(R.string.oauth_client_id),
-    			new String[] {"web", "api"});
+    			new String[] {"web"});
 		
 		try {
 			// TODO we should check if the auth token needs to be refreshed
-			
 			RestClient client = new ClientManager(this, accountType, loginOptions).peekRestClient();
-			
 			if (client != null) {
+				Log.i("DelegatedLoginActivity", "Setting cookies on webview: " + client.getClientInfo());
 				CookieHelper.setSidCookies(webView, client);
 			}
 				
 		} catch (AccountInfoNotFoundException e) {
 			Log.w("DelegatedLoginActivity", e);
 		}
+	}
+
+	@Override
+	protected void loadLoginPage() {
+		webView.loadUrl("https://tapp0.salesforce.com/home/home.jsp");
+		// webView.loadUrl("http://www.google.com");
 	}
 
 	@Override

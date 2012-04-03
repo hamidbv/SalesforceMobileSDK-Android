@@ -37,7 +37,6 @@ public class SalesforceRImpl extends SalesforceR {
 	/* Login */
 	public int stringAccountType() { return R.string.account_type; }
 	public int layoutLogin() {return R.layout.login; }
-	public int idLoginTitle() { return R.id.login_title; }	
 	public int idLoginWebView() {return R.id.oauth_webview; }
 	public int stringGenericError() {return R.string.generic_error; }
 	public int stringGenericAuthenticationErrorTitle() {return R.string.generic_authentication_error_title; } 

@@ -53,7 +53,6 @@ import com.salesforce.androidsdk.security.Encryptor;
 
 public class ClientManagerTest extends InstrumentationTestCase {
 
-	private static final String TEST_APP_NAME = "test_app";
 	private static final String TEST_PASSCODE_HASH = Encryptor.hash("passcode", "hash-key");
 	private static final String TEST_ORG_ID = "test_org_id";
 	private static final String TEST_USER_ID = "test_user_id";
@@ -80,7 +79,7 @@ public class ClientManagerTest extends InstrumentationTestCase {
 		super.setUp();
 		TestCredentials.init(getInstrumentation().getContext());
 		targetContext = getInstrumentation().getTargetContext();
-		loginOptions = new LoginOptions(TEST_APP_NAME, TEST_LOGIN_URL, TEST_PASSCODE_HASH, TEST_CALLBACK_URL, TEST_CLIENT_ID, TEST_SCOPES);
+		loginOptions = new LoginOptions(TEST_LOGIN_URL, TEST_PASSCODE_HASH, TEST_CALLBACK_URL, TEST_CLIENT_ID, TEST_SCOPES);
 		clientManager = new ClientManager(targetContext, TEST_ACCOUNT_TYPE, loginOptions);
 		accountManager = clientManager.getAccountManager();
 	}

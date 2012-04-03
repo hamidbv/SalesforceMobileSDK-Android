@@ -38,18 +38,20 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.TextView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.salesforce.androidsdk.app.ForceApp;
@@ -105,12 +107,12 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 		// Setup content view
 		setContentView(salesforceR.layoutLogin());
 		
-		// Overriding title if one was passed in
-		if (loginOptions.loginTitle != null) {
-			((TextView) findViewById(salesforceR.idLoginTitle())).setText(loginOptions.loginTitle);
+		// Prepare cookies
+		if (savedInstanceState != null) {
+			setupWebViewCookies();
 		}
-
-		// Setup the WebView.
+		
+		// Setup the WebView
 		webView = (WebView) findViewById(salesforceR.idLoginWebView());
 		webView.getSettings().setJavaScriptEnabled(true);
 		webView.setWebViewClient(new AuthWebViewClient());
@@ -122,10 +124,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 		if (savedInstanceState != null) {
 			webView.restoreState(savedInstanceState);
 		}
-		// Otherwise start clean
-		else {
-			setupWebViewCookies();
-		}
+
 		loadLoginPage();
 	}
 
@@ -229,6 +228,8 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 	
 	protected void addAccount(String username, String refreshToken, String authToken, String instanceUrl,
 			String loginUrl, String clientId, String orgId, String userId) {
+		
+		Log.i("addAccount", authToken);
 
 		ClientManager clientManager = new ClientManager(this, ForceApp.APP.getAccountType(), loginOptions);
 		
@@ -397,8 +398,24 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 	 *
 	 */
 	class AuthWebViewClient extends WebViewClient {
+		
+		
+		
+		@Override
+		public void onPageStarted(WebView view, String url, Bitmap favicon) {
+			Log.i("onPageStarted", url);
+			super.onPageStarted(view, url, favicon);
+		}
+
+		@Override
+		public void onLoadResource(WebView view, String url) {
+			Log.i("onLoadResource", url);
+			super.onLoadResource(view, url);
+		}
+
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
+			Log.i("shouldOverrideUrlLoading", url);			
 			boolean isDone = url.startsWith(loginOptions.oauthCallbackUrl);
 			
 			if (isDone) {

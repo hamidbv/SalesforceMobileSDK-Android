@@ -453,10 +453,8 @@ public class ClientManager {
 		private static final String OAUTH_CALLBACK_URL = "oauthCallbackUrl";
 		private static final String PASSCODE_HASH = "passcodeHash";
 		private static final String LOGIN_URL = "loginUrl";
-		private static final String LOGIN_TITLE = "loginTitle";
 
 		public String loginUrl;
-		public final String loginTitle;
 		public final String passcodeHash;
 		public final String oauthCallbackUrl;
 		public final String oauthClientId;
@@ -464,11 +462,10 @@ public class ClientManager {
 		private final Bundle bundle; 
 		
 		public LoginOptions(String passcodeHash, String oauthCallbackUrl, String oauthClientId, String[] oauthScopes) {
-			this(null, null, passcodeHash, oauthCallbackUrl, oauthClientId, oauthScopes);
+			this(null, passcodeHash, oauthCallbackUrl, oauthClientId, oauthScopes);
 		}
 		
-		public LoginOptions(String loginTitle, String loginUrl, String passcodeHash, String oauthCallbackUrl, String oauthClientId, String[] oauthScopes) {
-			this.loginTitle = loginTitle;
+		public LoginOptions(String loginUrl, String passcodeHash, String oauthCallbackUrl, String oauthClientId, String[] oauthScopes) {
 			this.loginUrl = loginUrl;
 			this.passcodeHash = passcodeHash;
 			this.oauthCallbackUrl = oauthCallbackUrl;
@@ -476,7 +473,6 @@ public class ClientManager {
 			this.oauthScopes = oauthScopes;
 
 			bundle = new Bundle();
-			bundle.putString(LOGIN_TITLE, loginTitle);
 			bundle.putString(LOGIN_URL, loginUrl);
 			bundle.putString(PASSCODE_HASH, passcodeHash);
 			bundle.putString(OAUTH_CALLBACK_URL, oauthCallbackUrl);
@@ -490,8 +486,7 @@ public class ClientManager {
 		}
 		
 		public static LoginOptions fromBundle(Bundle options) {
-			return new LoginOptions(options.getString(LOGIN_TITLE), 
-									options.getString(LOGIN_URL),
+			return new LoginOptions(options.getString(LOGIN_URL),
 									options.getString(PASSCODE_HASH),
 									options.getString(OAUTH_CALLBACK_URL),
 									options.getString(OAUTH_CLIENT_ID), 
