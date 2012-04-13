@@ -14,7 +14,47 @@
 <script type="text/javascript" src="libs/jquery-1.7.2.min.js"></script>
 <script type="text/javascript" src="libs/underscore-min.js"></script>
 <script type="text/javascript" src="libs/backbone-min.js"></script>
+<script type="text/javascript" src="phonegap-1.2.0.js"></script>
+<script type="text/javascript" src="SalesforceOAuthPlugin.js"></script>
 <script type="text/javascript" src="js/app.js"></script>
+
+
+<script>
+    var apiVersion = "v24.0";
+
+    jQuery(document).ready(function() {
+        //Add event listeners and so forth here
+        console.log("onLoad: jquery ready");
+		document.addEventListener("deviceready", onDeviceReady,false);
+    });
+
+    // When this function is called, PhoneGap has been initialized and is ready to roll 
+    function onDeviceReady() {
+        console.log("onDeviceReady: PhoneGap ready");
+		//Call getAuthCredentials to get the initial session credentials
+        SalesforceOAuthPlugin.getAuthCredentials(getAuthCredentialsSuccess, getAuthCredentialsError);
+        //register to receive notifications when autoRefreshOnForeground refreshes the sfdc session
+        document.addEventListener("salesforceSessionRefresh",salesforceSessionRefreshed,false);
+    }
+        
+    function  getAuthCredentialsSuccess(creds) {
+    	salesforceSessionRefreshed(creds);
+    	employeeDirectoryStart();
+    }
+
+    function salesforceSessionRefreshed(creds) {
+        console.log("salesforceSessionRefreshed");
+        sfdc.INSTANCE = creds.instanceUrl;
+        sfdc.OAUTH_TOKEN = creds.accessToken;
+		$.ajaxSetup({
+			headers: {'Authorization': 'OAuth ' + sfdc.OAUTH_TOKEN, 'User-Agent': creds.userAgent}
+		});
+    }
+
+    function getAuthCredentialsError(error) {
+        console.log("getAuthCredentialsError: " + error);
+    }
+</script>
 
 </body>
 </html>

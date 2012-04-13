@@ -12,7 +12,7 @@
 <div class="scroll striped" style="top:44px;">
     <div class="employee-summary">
         <header>
-            <img id="employeePic" src="pics/<%= firstName %>_<%= lastName %>.jpg" width="100"/>
+            <img id="employeePic" src="<%= photoUrl %>" width="100"/>
 
             <h1><%= firstName %> <%= lastName %></h1>
             <span class="link-text"><%= title %></span><br/>
@@ -32,12 +32,12 @@
             </a>
         </li>
         <% } %>
-        <% if (reportCount > 0) { %>
+        <% if (followersCount > 0) { %>
         <li>
-            <a href="#employees/<%= id %>/reports">
+            <a href="#employees/<%= id %>/followers">
                 <div class="story">
-                    <b>View Direct Reports</b><br/>
-                    <span class="metadata"><%= reportCount %></span>
+                    <b>View Followers</b><br/>
+                    <span class="metadata"><%= followersCount %></span>
                 </div>
                 <img src="css/images/reports.png" class="action-icon"/>
             </a>

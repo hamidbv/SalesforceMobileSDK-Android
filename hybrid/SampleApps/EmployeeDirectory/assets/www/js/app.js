@@ -1,5 +1,11 @@
 "use strict";
 
+// Structure is updated after authentication
+var sfdc = {
+	INSTANCE: '',
+	OAUTH_TOKEN: ''
+};
+
 // Creating the application namespace
 var directory = {
     models: {},
@@ -20,7 +26,8 @@ directory.utils.templateLoader = {
             self = this;
 
         $.each(names, function(index, name) {
-            deferreds.push($.get('tpl/' + name + '.html', function(data) {
+            // deferreds.push($.get(SFHybridApp.buildLocalUrl('tpl/' + name + '.html'), function(data) {
+        	deferreds.push($.get('tpl/' + name + '.html', function(data) {
                 self.templates[name] = data;
             }));
         });
@@ -35,88 +42,42 @@ directory.utils.templateLoader = {
 
 };
 
-// The in-memory Store. Encapsulates logic to access employee data.
-directory.utils.store = {
-
-    employees: {},
-
-    populate: function() {
-        this.employees[1] = {id: 1, firstName: 'Ryan', lastName: 'Howard', title: 'Vice President, North East', managerId: null, managerName: null, city: 'New York, NY', officePhone: '212-999-8888', cellPhone: '212-999-8887', email: 'ryan@dundermifflin.com', reportCount: 2};
-        this.employees[2] = {id: 2, firstName: 'Michael', lastName: 'Scott', title: 'Regional Manager', managerId: 1, managerName: 'Ryan Howard', city: 'Scranton, PA', officePhone: '570-888-9999', cellPhone: '570-222-3333', email: 'michael@dundermifflin.com', reportCount: 7};
-        this.employees[3] = {id: 3, firstName: 'Dwight', lastName: 'Schrute', title: 'Assistant Regional Manager', managerId: 2, managerName: 'Michael Scott', city: 'Scranton, PA', officePhone: '570-444-4444', cellPhone: '570-333-3333', email: 'dwight@dundermifflin.com', reportCount: 0};
-        this.employees[4] = {id: 4, firstName: 'Jim', lastName: 'Halpert', title: 'Assistant Regional Manager', managerId: 2, managerName: 'Michael Scott', city: 'Scranton, PA', officePhone: '570-222-2121', cellPhone: '570-999-1212', email: 'jim@dundermifflin.com', reportCount: 1};
-        this.employees[5] = {id: 5, firstName: 'Pamela', lastName: 'Beesly', title: 'Receptionist',managerId: 2, managerName: 'Michael Scott', city: 'Scranton, PA', officePhone: '570-999-5555', cellPhone: '570-999-7474', email: 'pam@dundermifflin.com', reportCount: 0};
-        this.employees[6] = {id: 6, firstName: 'Angela', lastName: 'Martin', title: 'Senior Accountant',managerId: 2, managerName: 'Michael Scott', city: 'Scranton, PA', officePhone: '570-555-9696', cellPhone: '570-999-3232', email: 'angela@dundermifflin.com', reportCount: 2};
-        this.employees[7] = {id: 7, firstName: 'Kevin', lastName: 'Malone', title: 'Accountant',managerId: 6, managerName: 'Angela Martin', city: 'Scranton, PA', officePhone: '570-777-9696', cellPhone: '570-111-2525', email: 'kmalone@dundermifflin.com', reportCount: 0};
-        this.employees[8] = {id: 8, firstName: 'Oscar', lastName: 'Martinez', title: 'Accountant',managerId: 6, managerName: 'Angela Martin', city: 'Scranton, PA', officePhone: '570-321-9999', cellPhone: '570-585-3333', email: 'oscar@dundermifflin.com', reportCount: 0};
-        this.employees[9] = {id: 9, firstName: 'Creed', lastName: 'Bratton', title: 'Quality Assurance', managerId: 2, managerName: 'Michael Scott', city: 'Scranton, PA', officePhone: '570-222-6666', cellPhone: '333-8585', email: 'creed@dundermifflin.com', reportCount: 0};
-        this.employees[10] = {id: 10, firstName: 'Andy', lastName: 'Bernard', title: 'Sales Director', managerId: 4, managerName: 'Jim Halpert', city: 'Scranton, PA', officePhone: '570-555-0000', cellPhone: '570-546-9999',email: 'andy@dundermifflin.com', reportCount: 2};
-        this.employees[11] = {id: 11, firstName: 'Phyllis', lastName: 'Lapin', title: 'Sales Representative', managerId: 10, managerName: 'Andy Bernard', city: 'Scranton, PA', officePhone: '570-141-3333', cellPhone: '570-888-6666', email: 'phyllis@dundermifflin.com', reportCount: 0};
-        this.employees[12] = {id: 12, firstName: 'Stanley', lastName: 'Hudson', title: 'Sales Representative', managerId: 10, managerName: 'Andy Bernard', city: 'Scranton, PA', officePhone: '570-700-6666', cellPhone: '570-777-6666', email: 'shudson@dundermifflin.com', reportCount: 0};
-        this.employees[13] = {id: 13, firstName: 'Meredith', lastName: 'Palmer', title: 'Supplier Relations', managerId: 2, managerName: 'Michael Scott', city: 'Scranton, PA', officePhone: '570-555-8888', cellPhone: '570-777-2222', email: 'meredith@dundermifflin.com', reportCount: 0};
-        this.employees[14] = {id: 14, firstName: 'Kelly', lastName: 'Kapoor', title: 'Customer Service Rep.', managerId: 2, managerName: 'Michael Scott', city: 'Scranton, PA', officePhone: '570-123-9654', cellPhone: '570-125-3666', email: 'kelly@dundermifflin.com', reportCount: 0};
-        this.employees[15] = {id: 15, firstName: 'Toby', lastName: 'Flenderson', title: 'Human Resources', managerId: 1, managerName: 'Ryan Howard', city: 'Scranton, PA', officePhone: '570-485-8554', cellPhone: '570-996-5577', email: 'tflenderson@dundermifflin.com', reportCount: 0};
-    },
-
-    findById: function(id) {
-        return this.employees[id];
-    },
-
-    findAll: function() {
-        return this.employees;
-    },
-
-    findByName: function(key) {
-        var results = [];
-        for (var id in this.employees) {
-            if ( (this.employees[id].firstName + " " + this.employees[id].lastName).toLowerCase().indexOf(key.toLowerCase()) >= 0) {
-                results.push(this.employees[id]);
-            }
-        }
-        return results;
-    },
-
-    findByManager: function(managerId) {
-        var results = [];
-        for (var id in this.employees) {
-            if (this.employees[id].managerId === managerId) {
-                results.push(this.employees[id]);
-            }
-        }
-        return results;
-    }
-
-};
-
-// Overriding Backbone's sync method. Replace the default RESTful services-based implementation
-// with a simple local database approach.
-Backbone.sync = function(method, model, options) {
-
-    var store = directory.utils.store;
-
-    if (method === "read") {
-        if (model.id) {
-            // Request to read a single item identified by its id.
-            options.success(store.findById(model.id));
-        } else if (model.managerId) {
-            // Request to read a collection of employees identified by the manager they work for.
-            options.success(store.findByManager(model.managerId));
-        } else {
-            // Request to read a collection of all employees.
-            options.success(store.findAll());
-        }
-    }
-
-};
-
 // -------------------------------------------------- The Models ---------------------------------------------------- //
 
 // The Employee Model
 directory.models.Employee = Backbone.Model.extend({
 
+    url: function() {
+        return  sfdc.INSTANCE + '/services/data/v24.0/chatter/users/' + this.id;
+    },
+
+    parse: function(resp, xhr) {
+        var phoneNumbersMap = {};
+        for (var phoneNumber in resp.phoneNumbers) {
+            phoneNumbersMap[phoneNumber.type] = phoneNumber.number;
+        }
+        var city = '';
+        if (resp.address && resp.address.city) city = resp.address.city;
+
+        return {
+            id: resp.id,
+            firstName: resp.firstName,
+            lastName: resp.lastName,
+            title: resp.title || '',
+            city: city,
+            managerName: resp.managerName || '',
+            managerId: resp.managerId || '',
+            followersCount: resp.followersCount,
+            officePhone: phoneNumbersMap['Work'] || '',
+            cellPhone: phoneNumbersMap['Mobile'] || '',
+            email: resp.email,
+            photoUrl: resp.photo.smallPhotoUrl
+        };
+    },
+
     initialize: function() {
-        this.reports = new directory.models.EmployeeCollection();
-        this.reports.managerId = this.id;
+        this.followers = new directory.models.EmployeeCollection();
+        this.followers.followingId = this.id;
     }
 
 });
@@ -126,10 +87,34 @@ directory.models.EmployeeCollection = Backbone.Collection.extend({
 
     model: directory.models.Employee,
 
-    store: directory.utils.store,
+    fetch: function() {
+        var url = sfdc.INSTANCE + "/services/data/v24.0/chatter/users/" + this.followingId + "/followers";
+        var self = this;
+        $.ajax({
+            url:url,
+            dataType:"json",
+            success:function (data) {
+                console.log("followers success: " + data.followers.length);
+                var subscribers = [];
+                for (var i = 0; i < data.followers.length; i++) {
+                    subscribers.push(data.followers[i].subscriber);
+                }
+                self.reset(subscribers, {'parse':true});
+            }
+        });
+    },
 
     findByName: function(key) {
-        this.reset(this.store.findByName(key));
+        var url = sfdc.INSTANCE + "/services/data/v24.0/chatter/users?q=" + encodeURIComponent(key);
+        var self = this;
+        $.ajax({
+            url:url,
+            dataType:"json",
+            success:function (data) {
+                console.log("search success: " + data.users.length);
+                self.reset(data.users, {'parse':true});
+            }
+        });
     }
 
 });
@@ -160,7 +145,7 @@ directory.views.SearchPage = Backbone.View.extend({
     }
 });
 
-directory.views.DirectReportPage = Backbone.View.extend({
+directory.views.FollowersPage = Backbone.View.extend({
 
     initialize: function() {
         this.template = _.template(directory.utils.templateLoader.get('report-page'));
@@ -227,7 +212,7 @@ directory.Router = Backbone.Router.extend({
         "": "list",
         "list": "list",
         "employees/:id": "employeeDetails",
-        "employees/:id/reports": "directReports"
+        "employees/:id/followers": "followers"
     },
 
     initialize: function() {
@@ -293,10 +278,10 @@ directory.Router = Backbone.Router.extend({
         });
     },
 
-    directReports: function(id) {
-        var employee = new directory.models.Employee({id: parseInt(id)});
-        employee.reports.fetch();
-        this.slidePage(new directory.views.DirectReportPage({model: employee.reports}).render());
+    followers: function(id) {
+        var employee = new directory.models.Employee({id: id});
+        employee.followers.fetch();
+        this.slidePage(new directory.views.FollowersPage({model: employee.followers}).render());
     },
 
     slidePage: function(page) {
@@ -350,9 +335,10 @@ directory.Router = Backbone.Router.extend({
 });
 
 // Bootstrap the application
-directory.utils.store.populate();
-directory.utils.templateLoader.load(['search-page', 'report-page', 'employee-page', 'employee-list-item'],
-    function() {
-        directory.app = new directory.Router();
-        Backbone.history.start();
-    });
+function employeeDirectoryStart() {
+    directory.utils.templateLoader.load(['search-page', 'report-page', 'employee-page', 'employee-list-item'],
+        function() {
+            directory.app = new directory.Router();
+            Backbone.history.start();
+        });
+}
