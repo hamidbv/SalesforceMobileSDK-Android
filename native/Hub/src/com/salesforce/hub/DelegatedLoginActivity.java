@@ -27,19 +27,17 @@
 package com.salesforce.hub;
 
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.os.Bundle;
 import android.util.Log;
-import android.webkit.CookieSyncManager;
+import android.webkit.WebView;
 
 import com.salesforce.androidsdk.app.ForceApp;
-import com.salesforce.androidsdk.auth.HttpAccess;
-import com.salesforce.androidsdk.auth.OAuth2;
-import com.salesforce.androidsdk.auth.OAuth2.TokenEndpointResponse;
 import com.salesforce.androidsdk.rest.ClientManager;
 import com.salesforce.androidsdk.rest.ClientManager.AccountInfoNotFoundException;
 import com.salesforce.androidsdk.rest.ClientManager.LoginOptions;
 import com.salesforce.androidsdk.rest.RestClient;
 import com.salesforce.androidsdk.ui.LoginActivity;
+import com.salesforce.androidsdk.ui.OAuthWebviewHelper;
 import com.salesforce.androidsdk.util.CookieHelper;
 
 /**
@@ -51,92 +49,45 @@ import com.salesforce.androidsdk.util.CookieHelper;
  */
 public class DelegatedLoginActivity extends LoginActivity {
 
-    @Override
-    public void onResume() {
-    	CookieSyncManager.getInstance().startSync();
-    	super.onResume();
-    }
-    
-    @Override
-    public void onPause() {
-    	CookieSyncManager.getInstance().stopSync();
-    	super.onPause();
-    }
-	
-	@Override
-	protected void setupWebViewCookies() {
-		String accountType = ForceApp.APP.getAccountType();
-    	LoginOptions loginOptions = new LoginOptions(
-    			ForceApp.APP.getPasscodeHash(),
-    			getString(R.string.oauth_callback_url),
-    			getString(R.string.oauth_client_id),
-    			new String[] {"web"});
+	protected OAuthWebviewHelper buildOAuthWebviewHelper(
+			Bundle savedInstanceState, final LoginOptions loginOptions,
+			final WebView webView) {
 		
-		try {
-			// TODO we should check if the auth token needs to be refreshed
-			RestClient client = new ClientManager(this, accountType, loginOptions).peekRestClient();
-			if (client != null) {
-				Log.i("DelegatedLoginActivity", "Setting cookies on webview: " + client.getClientInfo());
-				CookieHelper.setSidCookies(webView, client);
-			}
+		return new OAuthWebviewHelper(this, loginOptions, webView, savedInstanceState) {
+
+			@Override
+			protected void setupWebViewCookies() {
+				// Instead of clearing the cookies, we set the sid to be the hub's auth token
+				// That will cause the login screen to be by-passed and the application approval screen 
+				// to be the first one shown to the user
+				String accountType = ForceApp.APP.getAccountType();
+		    	LoginOptions loginOptions = new LoginOptions(
+		    			ForceApp.APP.getPasscodeHash(),
+		    			getString(R.string.oauth_callback_url),
+		    			getString(R.string.oauth_client_id),
+		    			new String[] {"web"});
 				
-		} catch (AccountInfoNotFoundException e) {
-			Log.w("DelegatedLoginActivity", e);
-		}
-	}
-
-	@Override
-	protected void onAuthFlowComplete(TokenEndpointResponse tr) {
-		FinishDelegatedAuthTask t = new FinishDelegatedAuthTask();
-		t.execute(tr);
-	}
-	
-	protected class FinishDelegatedAuthTask extends
-			AsyncTask<TokenEndpointResponse, Boolean, Intent> {
-
-		@Override
-		protected final Intent doInBackground(
-				TokenEndpointResponse... params) {
-			try {
-				publishProgress(true);
-
-				TokenEndpointResponse tr= params[0];
-
-				String username = OAuth2.getUsernameFromIdentityService(
-				HttpAccess.DEFAULT, tr.idUrlWithInstance, tr.authToken);
+				try {
+					// TODO we should check if the auth token needs to be refreshed
+					RestClient client = new ClientManager(DelegatedLoginActivity.this, accountType, loginOptions).peekRestClient();
+					if (client != null) {
+						Log.i("DelegatedLoginActivity", "Setting cookies on webview: " + client.getClientInfo());
+						CookieHelper.setSidCookies(webView, client);
+					}
+						
+				} catch (AccountInfoNotFoundException e) {
+					Log.w("DelegatedLoginActivity", e);
+				}
+			}
 			
+			protected void addAccount() {
+				// Instead of creating an account, we return the auth credentials
 				Intent result = new Intent();
 				result.putExtra("clientId", loginOptions.oauthClientId);
-				result.putExtra("orgId", tr.orgId);
-				result.putExtra("userId", tr.userId);
-				result.putExtra("username", username);
-				result.putExtra("instanceUrl", tr.instanceUrl);
-				result.putExtra("loginUrl", loginOptions.loginUrl);
-				result.putExtra("authToken", tr.authToken);
-				result.putExtra("refreshToken", tr.refreshToken);
-				return result;
-			} 
-			catch (Exception ex) {
-				return null;
-			}
-		}
-
-		@Override
-		protected void onPostExecute(Intent result) {
-			if (result != null) {
+				result.putExtras(accountOptions.asBundle());
 				setResult(RESULT_OK, result);
 			}
-			else {
-				setResult(RESULT_CANCELED);
-			}
-
-			finish();
-		}
-
-		@Override
-		protected void onProgressUpdate(Boolean... values) {
-			setProgressBarIndeterminateVisibility(values[0]);
-			setProgressBarIndeterminate(values[0]);
-		}
+			
+		};
 	}
 }

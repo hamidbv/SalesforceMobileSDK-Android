@@ -82,12 +82,11 @@ public class MainActivity extends Activity {
 					String clientId = data.getStringExtra("clientId");
 					String instanceUrl = data.getStringExtra("instanceUrl");
 					String loginUrl = data.getStringExtra("loginUrl");
-					String accountName = data.getStringExtra("accountName");
 					String username = data.getStringExtra("username");
 					String userId = data.getStringExtra("userId");
 					String orgId = data.getStringExtra("orgId");
 
-					ClientInfo clientInfo = new ClientInfo(clientId, new URI(instanceUrl), new URI(loginUrl), accountName, username, userId, orgId);
+					ClientInfo clientInfo = new ClientInfo(clientId, new URI(instanceUrl), new URI(loginUrl), null, username, userId, orgId);
 					String authToken = data.getStringExtra("authToken");
 					client = new RestClient(clientInfo, authToken, HttpAccess.DEFAULT, null);
 
