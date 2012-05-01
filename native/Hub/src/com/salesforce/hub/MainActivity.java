@@ -99,6 +99,7 @@ public class MainActivity extends Activity {
     @Override
     public void onPause() {
     	passcodeManager.onPause(this);
+        super.onPause();
     }
 
 	/**
