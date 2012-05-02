@@ -130,8 +130,9 @@ public abstract class ForceApp extends Application {
         // Initialize encryption module
         Encryptor.init(this);
         
-        // Initialize the http client        
-        HttpAccess.init(this, getUserAgent());
+        // Initialize the http client
+        String extendedUserAgent = getUserAgent() + " Native";
+        HttpAccess.init(this, extendedUserAgent);
         
 		// Done
         APP = this;
@@ -292,7 +293,7 @@ public abstract class ForceApp extends Application {
 	private Map<String, String> uuids = new HashMap<String, String>();
 	private synchronized String getUuId(String name) {
 		if (uuids.get(name) != null) return uuids.get(name);
-		SharedPreferences sp = getSharedPreferences("uuids", Context.MODE_PRIVATE);
+		SharedPreferences sp = getSharedPreferences("uuids2", Context.MODE_PRIVATE);
 		if (!sp.contains(name)) {
 			String uuid = UUID.randomUUID().toString();
 			Editor e = sp.edit();
