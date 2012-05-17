@@ -34,11 +34,11 @@ import com.salesforce.androidsdk.ui.SalesforceR;
 
 
 /**
- * Application class 
- * All Salesforce mobile apps must extend ForceApp. 
- * ForceApp takes care of intializing the network http clients (among other things).
+ * Application class for the contact explorer.
+ * All Salesforce mobile app must extend ForceApp. 
+ * ForceApp takes care of intializing the network http clients (among other things).x
  */
-public class EmpDirApp extends ForceApp {
+public class EmployeeDirectoryApp extends ForceApp {
 
 	private SalesforceR salesforceR = new SalesforceRImpl();
 	
@@ -48,13 +48,8 @@ public class EmpDirApp extends ForceApp {
 	}
 	
 	@Override
-	public int getLockTimeoutMinutes() {
-		return 0;
-	}
-
-	@Override
 	protected String getKey(String name) {
-		return null; 
+		return null;
 	}
 
 	@Override
